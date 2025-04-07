@@ -11,7 +11,6 @@ export class Book extends Entity {
   @property({
     type: 'number',
     id: true,
-    generated: false,
     required: true,
   })
   isbn: number;
@@ -23,16 +22,16 @@ export class Book extends Entity {
   price: number;
 
   @property({
-    type: 'number',
+    type: 'string',
     required: true,
   })
-  author_id: number;
+  author_name: string;
 
   @property({
-    type: 'number',
+    type: 'string',
     required: true,
   })
-  category_id: number;
+  genre: string;
 
   @property({
     type: 'string',

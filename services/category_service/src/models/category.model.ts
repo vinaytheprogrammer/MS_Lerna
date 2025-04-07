@@ -5,10 +5,9 @@ export class Category extends Entity {
   @property({
     type: 'number',
     id: true,
-    generated: false,
-    required: true,
+    generated: true,
   })
-  category_id: number;
+  category_id?: number;
 
   @property({
     type: 'string',
@@ -18,9 +17,9 @@ export class Category extends Entity {
 
   @property({
     type: 'number',
-    default: null,
+    required: true,
   })
-  isbn?: number;
+  isbn: number;
 
 
   constructor(data?: Partial<Category>) {

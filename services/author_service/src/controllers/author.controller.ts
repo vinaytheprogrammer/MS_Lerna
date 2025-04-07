@@ -16,6 +16,7 @@ import {
   del,
   requestBody,
   response,
+  HttpErrors,
 } from '@loopback/rest';
 import {Author} from '../models';
 import {AuthorRepository} from '../repositories';
@@ -23,7 +24,7 @@ import {AuthorRepository} from '../repositories';
 export class AuthorController {
   constructor(
     @repository(AuthorRepository)
-    public authorRepository : AuthorRepository,
+    public authorRepository: AuthorRepository,
   ) {}
 
   @post('/authors')
@@ -35,24 +36,24 @@ export class AuthorController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Author), // no exclude here
+          schema: getModelSchemaRef(Author, {
+            title: 'NewAuthor',
+            exclude: ['author_id'], // exclude ID from input
+          }),
         },
       },
     })
-    author: Author, // accept full Author object, including `author_id`
+    author: Omit<Author, 'author_id'>, // type-safe way to enforce it
   ): Promise<Author> {
     return this.authorRepository.create(author);
   }
-  
 
   @get('/authors/count')
   @response(200, {
     description: 'Author model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Author) where?: Where<Author>,
-  ): Promise<Count> {
+  async count(@param.where(Author) where?: Where<Author>): Promise<Count> {
     return this.authorRepository.count(where);
   }
 
@@ -68,9 +69,7 @@ export class AuthorController {
       },
     },
   })
-  async find(
-    @param.filter(Author) filter?: Filter<Author>,
-  ): Promise<Author[]> {
+  async find(@param.filter(Author) filter?: Filter<Author>): Promise<Author[]> {
     return this.authorRepository.find(filter);
   }
 
@@ -85,9 +84,27 @@ export class AuthorController {
   })
   async findById(
     @param.path.number('id') id: number,
-    @param.filter(Author, {exclude: 'where'}) filter?: FilterExcludingWhere<Author>
+    @param.filter(Author, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Author>,
   ): Promise<Author> {
     return this.authorRepository.findById(id, filter);
+  }
+
+  @get('/authors/isbn/{isbn}')
+  @response(200, {
+    description: 'Author instance by ISBN',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Author, {includeRelations: true}),
+      },
+    },
+  })
+  async findByIsbn(@param.path.number('isbn') isbn: number): Promise<Author> {
+    const author = await this.authorRepository.findOne({where: {isbn}});
+    if (!author) {
+      throw new HttpErrors.NotFound(`Author with ISBN ${isbn} not found`);
+    }
+    return author;
   }
 
   @del('/authors/{id}')

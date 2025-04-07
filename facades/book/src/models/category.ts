@@ -2,6 +2,6 @@ import { IBook } from './book';
 
 export interface ICategory {
     category_id?: number;
-    category: string;
+    genre: string;
     books?: IBook[];
   }

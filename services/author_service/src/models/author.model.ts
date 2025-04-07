@@ -17,9 +17,9 @@ export class Author extends Entity {
   @property({
     type: 'number',
     id: true,
-    generated: false,
+    generated: true,
   })
-  author_id: number;
+  author_id?: number;
 
 
   constructor(data?: Partial<Author>) {

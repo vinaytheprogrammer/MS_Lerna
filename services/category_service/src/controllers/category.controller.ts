@@ -16,6 +16,7 @@ import {
   del,
   requestBody,
   response,
+  HttpErrors,
 } from '@loopback/rest';
 import {Category} from '../models';
 import {CategoryRepository} from '../repositories';
@@ -35,11 +36,16 @@ async create(
   @requestBody({
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Category), // ✅ no exclude
+        schema: getModelSchemaRef(Category, {
+          title: 'NewCategory',
+          exclude: ['category_id'], // exclude ID from input
+        }), // ✅ no exclude
       },
     },
   })
-  category: Category, // ✅ full Category object including category_id
+  // category: Category, // ✅ full Category object including category_id
+  category: Omit<Category, 'category_id'>, // type-safe way to enforce it
+
 ): Promise<Category> {
   return this.categoryRepository.create(category);
 }
@@ -137,6 +143,25 @@ async create(
   ): Promise<void> {
     await this.categoryRepository.replaceById(id, category);
   }
+
+
+  @get('/categories/isbn/{isbn}')
+  @response(200, {
+    description: 'Author instance by ISBN',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Category, {includeRelations: true}),
+      },
+    },
+  })
+  async findByIsbn(@param.path.number('isbn') isbn: number): Promise<Category> {
+    const category = await this.categoryRepository.findOne({where: {isbn}});
+    if (!category) {
+      throw new HttpErrors.NotFound(`Category with ISBN ${isbn} not found`);
+    }
+    return category;
+  }
+
 
   @del('/categories/{id}')
   @response(204, {
