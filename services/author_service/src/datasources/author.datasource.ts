@@ -4,11 +4,11 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'author',
   connector: 'mysql',
-  url: 'mysql://vinay:password@localhost/author',
+  url: 'mysql://root:Vinay@123@localhost/author',
   host: 'localhost',
   port: 3306,
-  user: 'vinay',
-  password: 'password',
+  user: 'root',
+  password: 'Vinay@123',
   database: 'author'
 };
 
