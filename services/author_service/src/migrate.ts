@@ -1,8 +1,27 @@
 import {AuthorServiceApplication} from './application';
+import * as mysql from 'mysql2/promise';
 
 export async function migrate(args: string[]) {
   const existingSchema = args.includes('--rebuild') ? 'drop' : 'alter';
   console.log('Migrating schemas (%s existing schema)', existingSchema);
+
+  
+  // Step 1: Create the DB if it doesn't exist
+  try {
+    const connection = await mysql.createConnection({
+      host: 'localhost',       // replace if different
+      user: 'root',            // your MySQL user
+      password: 'Vinay@123',            // your MySQL password
+      port: 3306               // default port
+    });
+
+    await connection.query('CREATE DATABASE IF NOT EXISTS author;');
+    console.log('Ensured "author" database exists.');
+    await connection.end();
+  } catch (err) {
+    console.error('Failed to ensure the database exists', err);
+    process.exit(1);
+  }
 
   const app = new AuthorServiceApplication();
   await app.boot();
