@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    ports:
+      - '3012:3005'
+    environment:
+      NODE_ENV: development
+      DB_HOST: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - lb4-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: author
+      MYSQL_ROOT_HOST: '%' # % meaning all hosts
+      MYSQL_USER: ${DB_USER}  # Add MySQL user from environment variables
+      MYSQL_PASSWORD: ${DB_PASSWORD}  # Add MySQL password from environment variables
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"] 
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - lb4-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+
+networks:
+  lb4-network:
+    driver: bridge

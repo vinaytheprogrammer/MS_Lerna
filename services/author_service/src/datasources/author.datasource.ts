@@ -4,12 +4,19 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'author',
   connector: 'mysql',
-  url: 'mysql://root:Vinay@123@localhost/author',
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'Vinay@123',
-  database: 'author'
+  host: process.env.DB_HOST, // Use 'mysql' for Docker container, 'localhost' for local development
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'Vinay@123',
+  database: 'author',
+
+  connectTimeout: 60000, // Only this timeout is needed
+  acquireTimeout: 60000, // For connection pool
+  connectionLimit: 10,   // Connection pool size
+  // Add these for better handling
+  debug: false,
+  waitForConnections: true,
+  queueLimit: 0
 };
 
 // Observe application's life cycle to disconnect the datasource when
