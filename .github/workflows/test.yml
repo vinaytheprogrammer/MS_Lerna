@@ -23,10 +23,16 @@ jobs:
       with:
         node-version: 18 # Use the Node.js version specified in your project
 
-    # Step 3: Install dependencies
-    - name: Install dependencies
+    # Step 3: Install dependencies for the monorepo
+    - name: Install root dependencies
       run: npm install
 
-    # Step 4: Run tests
+    # Step 4: Navigate to the service folder and install dependencies
+    - name: Install service dependencies
+      working-directory: services/author_service
+      run: npm install
+
+    # Step 5: Run tests for the service
     - name: Run tests
+      working-directory: services/author_service
       run: npm test
